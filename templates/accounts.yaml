@@ -10,14 +10,35 @@ Resources:
   # 1. Detach or remove the following user resources: login profile, attached
   #    MFA device, access-keys, ssh-keys, and policies.
   # 2. Detach the user from all groups.
-  JoeSmithUser:
+  AWSIAMXavierSchildwachterUser:
     Type: 'AWS::IAM::User'
     Properties:
-      UserName: joe.smith@sagebase.org
+      UserName: x.schildwachter@sagebase.org
       Groups:
         - !Ref AWSIAMAllUsersGroup
         - !Ref AWSIAMDeveloperUsersGroup
         - !Ref AWSIAMBillingManagersGroup
+      LoginProfile:
+        Password: !Ref InitNewUserPassword
+        PasswordResetRequired: true
+  AWSIAMKhaiDoUser:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: khai.do@sagebase.org
+      Groups:
+        - !Ref AWSIAMAllUsersGroup
+        - !Ref AWSIAMDeveloperUsersGroup
+        - !Ref AWSIAMBillingManagersGroup
+      LoginProfile:
+        Password: !Ref InitNewUserPassword
+        PasswordResetRequired: true
+  AWSIAMAaronHaydenUser:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: aaron.hayden@sagebase.org
+      Groups:
+        - !Ref AWSIAMAllUsersGroup
+        - !Ref AWSIAMDeveloperUsersGroup
       LoginProfile:
         Password: !Ref InitNewUserPassword
         PasswordResetRequired: true
@@ -39,7 +60,9 @@ Resources:
             Effect: "Allow"
             Principal:
               AWS:
-                - !GetAtt JoeSmithUser.Arn
+                - !GetAtt AWSIAMXavierSchildwachterUser.Arn
+                - !GetAtt AWSIAMKhaiDoUser.Arn
+                - !GetAtt AWSIAMAaronHaydenUser.Arn
             Action:
               - "sts:AssumeRole"
       Path: "/"
