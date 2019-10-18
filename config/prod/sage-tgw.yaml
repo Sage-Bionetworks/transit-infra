@@ -1,0 +1,8 @@
+template_path: "transit-gateway.yaml"
+stack_name: "sage-tgw"
+dependencies:
+  - "prod/essentials.yaml"
+parameters:
+  TgwSharedPrincipals:
+    - "804034162148"  # org-sagebase-itsandbox
+    - "563295687221"  # org-sagebase-sandbox
