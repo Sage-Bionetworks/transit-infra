@@ -1,5 +1,41 @@
 # Overview
-A template to install, configure and manage an AWS account.
+A project to install, configure and manage org-sagebase-transit account.
+The purpose of this account is to run the AWS transit gateway as the
+"hub" of our hub and spoke architecture.
+
+![alt text][architecture]
+
+
+## Workflow
+AWS enforces a specific workflow when setting up the hub and spoke accounts.
+This workflow involves establishing connection between hub and spoke by
+sending and accepting invitations.
+
+### Setup a Hub
+Setup a transit gateway("hub") and send invitations to share the
+transit gateway to spoke accounts defined in the `TgwSharedPrincipals`
+parameter.
+
+1. Create a sceptre config template similar to config/prod/sage-tgw.yaml
+2. Deploy the hub template:
+`
+sceptre --var "profile=transit" --var "region=us-east-1" launch --yes prod/new-tgw.yaml
+`
+
+### Setup a Spoke
+The spoke accounts must accept the invitation sent by the hub.
+The transit gateway attachments are then setup on the spoke accounts.
+
+1. Login to spoke accounts defined in TgwSharedPrincipals
+2. Navigate to Resource Access Manager -> Shared with me -> Resource Shares ->
+accept the invitation.
+2. Create an attachment to the hub from the spoke accounts by creating
+a sceptre template similar to
+sandbox-infra/sage-tgw-sandcastlevpc-attachment.yaml
+3. Deploy the spoke template:
+`
+sceptre --var "profile=transit" --var "region=us-east-1" launch --yes prod/sage-tgw-sandcastlevpc-attachment.yaml
+`
 
 ## Instructions to create or update CF stacks
 
@@ -40,3 +76,6 @@ automatically run on every commit.
 to store secrets for this project.  Sceptre retrieves the secrets using
 a [sceptre ssm resolver](https://github.com/cloudreach/sceptre/tree/v1/contrib/ssm-resolver)
 and passes them to the cloudformation stack on deployment.
+
+
+[architecture]: transit-gateway-arch.png "hub and spoke architecture"
