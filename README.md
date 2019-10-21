@@ -21,18 +21,35 @@ parameter.
 `
 sceptre --var "profile=transit" --var "region=us-east-1" launch --yes prod/new-tgw.yaml
 `
+3. Login to the AWS transit account then navigate to VPC -> Transit Gateways ->
+Select the newly provisioned transit gateway -> Sharing tab ->
+Share transit gateway -> Share.
+
+__Note__: This TGW must be shared. Neither cloudformation nor the aws cli support
+setting the `sharing` config.
 
 ### Setup a Spoke
+Setting up the spoke account is a two step process.  First is to accept the
+sharing invitation from the hub then create an attachment to the hub.
+
+#### Accept Invitation
 The spoke accounts must accept the invitation sent by the hub.
 The transit gateway attachments are then setup on the spoke accounts.
 
 1. Login to spoke accounts defined in TgwSharedPrincipals
 2. Navigate to Resource Access Manager -> Shared with me -> Resource Shares ->
 accept the invitation.
-2. Create an attachment to the hub from the spoke accounts by creating
+3. Once the invitation is accepted the shared transit gateway (from "hub")
+should appear in VPC -> TransitGateway.
+
+#### Setup Attachement
+Setting up an attachment adds spoke accounts to the hub account however it does
+not setup routes between VPCs.
+
+1. Create an attachment to the hub from the spoke accounts by creating
 a sceptre template similar to
-sandbox-infra/sage-tgw-sandcastlevpc-attachment.yaml
-3. Deploy the spoke template:
+`sandbox-infra/sage-tgw-sandcastlevpc-attachment.yaml`
+2. Deploy the spoke template:
 `
 sceptre --var "profile=transit" --var "region=us-east-1" launch --yes prod/sage-tgw-sandcastlevpc-attachment.yaml
 `

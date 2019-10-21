@@ -48,6 +48,7 @@ Resources:
 
   TransitGatewaySharedResource:
     Type: AWS::RAM::ResourceShare
+    DependsOn: "TransitGateway"
     Properties:
       AllowExternalPrincipals: true
       Name: !Sub '${AWS::StackName}'
