@@ -7,9 +7,16 @@ The purpose of this account is to run the AWS transit gateway as the
 
 
 ## Workflow
-AWS enforces a specific workflow when setting up the hub and spoke accounts.
-This workflow involves establishing connection between hub and spoke by
-sending and accepting invitations.
+AWS enforces a specific workflow when setting up the Transit Gateway in a hub
+and spoke architecture.
+
+1. Setup the transit gateway in the central/hub account
+2. Share the transit gateway in the hub account (VPC settings).
+3. Share the transit gateway to spoke accounts with the Resource Access Manager.
+4. Accept invitations from spoke account in the Resource Access Manager.
+5. Create attachments to the transit gateway hub from spoke accounts.
+6. Setup transit gateway VPC routes in the hub account.
+
 
 ### Setup a Hub
 Setup a transit gateway("hub") and send invitations to share the
