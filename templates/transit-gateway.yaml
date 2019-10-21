@@ -32,7 +32,8 @@ Resources:
       # AmazonSideAsn: 65000
       Description: Transit gateway for Sage corp
       AutoAcceptSharedAttachments: "enable"
-      DefaultRouteTableAssociation: "enable"
+      DefaultRouteTableAssociation: "disable"
+      DefaultRouteTablePropagation: "disable"
       DnsSupport: "enable"
       VpnEcmpSupport: "enable"
       Tags:
