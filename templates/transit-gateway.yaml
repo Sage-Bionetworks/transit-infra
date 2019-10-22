@@ -45,10 +45,22 @@ Resources:
           Value: !Ref Project
         - Key: "OwnerEmail"
           Value: !Ref OwnerEmail
-
+  TransitGatewayRouteTable:
+    Type: "AWS::EC2::TransitGatewayRouteTable"
+    Properties:
+      TransitGatewayId: !Ref TransitGateway
+      Tags:
+        - Key: Name
+          Value: !Ref 'AWS::StackName'
+        - Key: "Department"
+          Value: !Ref Department
+        - Key: "Project"
+          Value: !Ref Project
+        - Key: "OwnerEmail"
+          Value: !Ref OwnerEmail
   TransitGatewaySharedResource:
     Type: AWS::RAM::ResourceShare
-    DependsOn: "TransitGateway"
+    DependsOn: "TransitGatewayRouteTable"
     Properties:
       AllowExternalPrincipals: true
       Name: !Sub '${AWS::StackName}'
@@ -68,6 +80,11 @@ Outputs:
     Value: !Ref TransitGateway
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitGateway'
+  TransitGatewayRouteTable:
+    Description: This Is the transit gateway route table Id
+    Value: !Ref TransitGatewayRouteTable
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitGatewayRouteTable'
   TransitGatewaySharedResourceArn:
     Description: This is the shared transit gateway arn
     Value: !GetAtt TransitGatewaySharedResource.Arn
