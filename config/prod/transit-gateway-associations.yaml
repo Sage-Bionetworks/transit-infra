@@ -1,0 +1,11 @@
+template_path: "transit-gateway-associations.j2"
+stack_name: "TransitGatewayAssociation"
+dependencies:
+  - "prod/sage-tgw.yaml"
+parameters:
+  TgwRouteTableId: "tgw-rtb-070d3a113bf29aac6" # sage-tgw
+sceptre_user_data:
+  stackname: !stack_name
+  tgw_attachment_ids:
+    - "tgw-attach-00209ee1f8bf96deb"  # sandbox/sandcastlevpc
+    - "tgw-attach-0eda99de834959854"  # itsandbox/dustbunnyvpc

@@ -15,8 +15,8 @@ and spoke architecture.
 3. Share the transit gateway to spoke accounts with the Resource Access Manager.
 4. Accept invitations from spoke account in the Resource Access Manager.
 5. Create attachments to the transit gateway hub from spoke accounts.
-6. Setup transit gateway VPC routes in the hub account.
-
+6. Create a transit gateway route table in the hub account.
+7. Add ("Associate") spoke TGW attachments to the hub transit gateway route table.
 
 ### Setup a Hub
 Setup a transit gateway("hub") and send invitations to share the
@@ -34,6 +34,7 @@ Share transit gateway -> Share.
 
 __Note__: This TGW must be shared. Neither cloudformation nor the aws cli support
 setting the `sharing` config.
+
 
 ### Setup a Spoke
 Setting up the spoke account is a two step process.  First is to accept the
