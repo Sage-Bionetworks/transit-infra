@@ -6,3 +6,4 @@ parameters:
   TgwSharedPrincipals:
     - "804034162148"  # org-sagebase-itsandbox
     - "563295687221"  # org-sagebase-sandbox
+    - "055273631518"  # org-sagebase-scicomp
