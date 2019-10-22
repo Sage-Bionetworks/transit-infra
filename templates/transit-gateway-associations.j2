@@ -1,17 +1,16 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: "Setup transit gateway route associations"
 Parameters:
-  TgwRouteTableId:
-    Description: 'The transit gateway route table ID'
+  TgwRouteTableName:
+    Description: 'The transit gateway route table name'
     Type: String
-    AllowedPattern: '^tgw-rtb-[a-z0-9]+$'
-    ConstraintDescription: 'Must be a TGW route table ID (i.e "tgw-rtb-111111")'
 Resources:
 {% for tgw_attachment_id in sceptre_user_data.tgw_attachment_ids %}
   {{ sceptre_user_data.stackname }}{{ loop.index }}:
       Type: AWS::EC2::TransitGatewayRouteTableAssociation
       Properties:
-        TransitGatewayRouteTableId: !Ref TgwRouteTableId
+        TransitGatewayRouteTableId: !ImportValue
+          'Fn::Sub': '${AWS::Region}-${TgwRouteTableName}-TransitGatewayRouteTable'
         TransitGatewayAttachmentId: {{ tgw_attachment_id }}
 {% endfor %}
 
