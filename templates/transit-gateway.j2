@@ -70,7 +70,7 @@ Outputs:
     Description: The transit gateway Id
     Value: !Ref TransitGateway
     Export:
-      Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitGateway'
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitGatewayId'
   TransitGatewayArn:
     Description: The transit gateway ARN
     Value: !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:transit-gateway/${TransitGateway}'
@@ -80,7 +80,7 @@ Outputs:
     Description: The transit gateway attachment ID
     Value: !Ref TransitGatewayAttachment
     Export:
-      Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitGatewayAttachment'
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitGatewayAttachmentId'
   SharedResourceArn:
     Condition: CreateSharedResource
     Description: The transit gateway shared resource ARN
