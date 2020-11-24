@@ -49,19 +49,19 @@ Resources:
       AllowExternalPrincipals: true
       Name: !Sub '${AWS::StackName}'
       Principals:
-      {% for spoke in sceptre_user_data.tgw_spokes %}
-        - "{{ sceptre_user_data.tgw_spokes[spoke].AccountId }}"
+      {% for spoke in sceptre_user_data.TgwSpokes %}
+        - "{{ sceptre_user_data.TgwSpokes[spoke].AccountId }}"
       {% endfor %}
       ResourceArns:
         - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:transit-gateway/${TransitGateway}'
       Tags:
         - Key: Name
           Value: !Ref 'AWS::StackName'
-{% for spoke in sceptre_user_data.tgw_spokes %}
+{% for spoke in sceptre_user_data.TgwSpokes %}
   RouteTable{{spoke}}:
     Type: AWS::EC2::Route
     Properties:
-      DestinationCidrBlock: "{{ sceptre_user_data.tgw_spokes[spoke].CIDR }}"
+      DestinationCidrBlock: "{{ sceptre_user_data.TgwSpokes[spoke].CIDR }}"
       RouteTableId: !Ref VpcRouteTableId
       TransitGatewayId: !Ref TransitGateway
 {% endfor %}

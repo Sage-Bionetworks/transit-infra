@@ -16,7 +16,7 @@ parameters:
     - !stack_output_external unionstationvpc::PrivateSubnet1
     - !stack_output_external unionstationvpc::PrivateSubnet2
 sceptre_user_data:
-  tgw_spokes:
+  TgwSpokes:
     ItSandbox:
       AccountId: "804034162148"
       CIDR: "10.29.0.0/16"
