@@ -1,0 +1,100 @@
+Description: Setup AWS client VPN endpoint
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ServerCertificateArn:
+    Type: String
+    Description: "The VPN server certificate ARN"
+  ClientCidrBlock:
+    Type: String
+    Description: "The CIDR assigned to clients connected to the VPN"
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+  VpnSamlProviderArn:
+    Type: String
+    Description: "The SAML provider ARN for the client VPN"
+  VpnSspSamlProviderArn:
+    Type: String
+    Description: "The SAML provider ARN for the client VPN self service portal"
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: "The VPC to associate VPN with"
+  ConnectionLogGroup:
+    Type: String
+    Description: "The cloudwatch log group for client connection information"
+Resources:
+  TransitVpnSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: "Transit VPN Security Group"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: -1
+          ToPort: -1
+          IpProtocol: "-1"
+      SecurityGroupEgress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: -1
+          ToPort: -1
+          IpProtocol: "-1"
+
+  TransitVpnEndpoint:
+    Type: AWS::EC2::ClientVpnEndpoint
+    Properties:
+      AuthenticationOptions:
+        - Type: "federated-authentication"
+          FederatedAuthentication:
+            SAMLProviderArn: !Ref VpnSamlProviderArn
+            SelfServiceSAMLProviderArn: !Ref VpnSspSamlProviderArn
+      ClientCidrBlock: !Ref ClientCidrBlock
+      ConnectionLogOptions:
+        Enabled: true
+        CloudwatchLogGroup: !Ref ConnectionLogGroup
+      SplitTunnel: true
+      ServerCertificateArn: !Ref ServerCertificateArn
+      SelfServicePortal: "enabled"
+      TransportProtocol: "udp"
+      VpcId: !Ref VpcId
+      SecurityGroupIds:
+        - !GetAtt TransitVpnSecurityGroup.GroupId
+      TagSpecifications:
+        - ResourceType: "client-vpn-endpoint"
+          Tags:
+            - Key: "Name"
+              Value: !Ref AWS::StackName
+
+{% for id in sceptre_user_data.SubnetIds %}
+  TransitVpnEndpointAssociation{{loop.index}}:
+    Type: AWS::EC2::ClientVpnTargetNetworkAssociation
+    Properties:
+      ClientVpnEndpointId: !Ref TransitVpnEndpoint
+      SubnetId: {{ id }}
+{% endfor %}
+
+{% for cidr in sceptre_user_data.DestinationCIDRs %}
+  TransitVpnEndpointAuthorization{{loop.index}}:
+    Type: AWS::EC2::ClientVpnAuthorizationRule
+    Properties:
+      AuthorizeAllGroups: true
+      ClientVpnEndpointId: !Ref TransitVpnEndpoint
+      TargetNetworkCidr: {{ cidr }}
+{% endfor %}
+
+{% for cidr in sceptre_user_data.DestinationCIDRs %}
+  {% set cidrloop = loop %}
+  {% for id in sceptre_user_data.SubnetIds %}
+  TransitVpnEndpointRoute{{cidrloop.index}}{{loop.index}}:
+    Type: AWS::EC2::ClientVpnRoute
+    Properties:
+      ClientVpnEndpointId: !Ref TransitVpnEndpoint
+      DestinationCidrBlock: {{ cidr }}
+      TargetVpcSubnetId: {{ id }}
+  {% endfor %}
+{% endfor %}
+
+Outputs:
+  TransitVpnEndpoint:
+    Description: The transit VPN endpoint Id
+    Value: !Ref TransitVpnEndpoint
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitVpnEndpointId'
