@@ -1,9 +1,25 @@
-template_path: "transit-gateway.yaml"
+template_path: "transit-gateway.j2"
 stack_name: "sage-tgw"
+stack_tags:
+  Department: "Platform"
+  Project: "Infrastructure"
+  OwnerEmail: "it@sagebase.org"
 dependencies:
   - "prod/essentials.yaml"
+  - "prod/unionstationvpc.yaml"
 parameters:
-  TgwSharedPrincipals:
-    - "804034162148"  # org-sagebase-itsandbox
-    - "563295687221"  # org-sagebase-sandbox
-    - "055273631518"  # org-sagebase-scicomp
+  VpcRouteTableId: !stack_output_external unionstationvpc::PrivateRouteTable
+  ShareTgw: "true"
+  VpcId: !stack_output_external unionstationvpc::VPCId
+  SubnetIds:
+    - !stack_output_external unionstationvpc::PrivateSubnet
+    - !stack_output_external unionstationvpc::PrivateSubnet1
+    - !stack_output_external unionstationvpc::PrivateSubnet2
+sceptre_user_data:
+  tgw_spokes:
+    ItSandbox:
+      AccountId: "804034162148"
+      CIDR: "10.29.0.0/16"
+    Sandbox:
+      AccountId: "563295687221"
+      CIDR: "10.23.0.0/16"

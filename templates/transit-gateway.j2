@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Setup an AWS transit gateway
+Parameters:
+  VpcId:
+    Description: 'The VPC ID to attach'
+    Type: String
+  VpcRouteTableId:
+    Description: 'The VPC route table ID'
+    Type: String
+  SubnetIds:
+    Description: 'The list of VPC subnet IDs to atttach'
+    Type: List<String>
+  ShareTgw:
+    Description: 'Share the Transit Gateway'
+    Type: String
+    AllowedValues:
+      - "true"
+      - "false"
+Conditions:
+  CreateSharedResource: !Equals [!Ref ShareTgw, "true"]
+Resources:
+  TransitGateway:
+    Type: "AWS::EC2::TransitGateway"
+    Properties:
+      Description: Transit gateway for Sage corp
+      AutoAcceptSharedAttachments: "enable"
+      DefaultRouteTableAssociation: "enable"
+      DefaultRouteTablePropagation: "enable"
+      DnsSupport: "enable"
+      VpnEcmpSupport: "enable"
+      Tags:
+        - Key: Name
+          Value: !Ref 'AWS::StackName'
+  TransitGatewayAttachment:
+    Type: AWS::EC2::TransitGatewayAttachment
+    Properties:
+      SubnetIds: !Ref SubnetIds
+      TransitGatewayId: !Ref TransitGateway
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Ref 'AWS::StackName'
+  SharedResource:
+    Condition: CreateSharedResource
+    Type: AWS::RAM::ResourceShare
+    DependsOn: TransitGateway
+    Properties:
+      AllowExternalPrincipals: true
+      Name: !Sub '${AWS::StackName}'
+      Principals:
+      {% for spoke in sceptre_user_data.tgw_spokes %}
+        - "{{ sceptre_user_data.tgw_spokes[spoke].AccountId }}"
+      {% endfor %}
+      ResourceArns:
+        - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:transit-gateway/${TransitGateway}'
+      Tags:
+        - Key: Name
+          Value: !Ref 'AWS::StackName'
+{% for spoke in sceptre_user_data.tgw_spokes %}
+  RouteTable{{spoke}}:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: "{{ sceptre_user_data.tgw_spokes[spoke].CIDR }}"
+      RouteTableId: !Ref VpcRouteTableId
+      TransitGatewayId: !Ref TransitGateway
+{% endfor %}
+Outputs:
+  TransitGateway:
+    Description: The transit gateway Id
+    Value: !Ref TransitGateway
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitGateway'
+  TransitGatewayArn:
+    Description: The transit gateway ARN
+    Value: !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:transit-gateway/${TransitGateway}'
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitGatewayArn'
+  TransitGatewayAttachment:
+    Description: The transit gateway attachment ID
+    Value: !Ref TransitGatewayAttachment
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitGatewayAttachment'
+  SharedResourceArn:
+    Condition: CreateSharedResource
+    Description: The transit gateway shared resource ARN
+    Value: !GetAtt SharedResource.Arn
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-SharedResourceArn'
