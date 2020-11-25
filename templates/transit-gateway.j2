@@ -5,9 +5,6 @@ Parameters:
   VpcId:
     Description: 'The VPC ID to attach'
     Type: String
-  VpcRouteTableId:
-    Description: 'The VPC route table ID'
-    Type: String
   SubnetIds:
     Description: 'The list of VPC subnet IDs to atttach'
     Type: List<String>
@@ -48,17 +45,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref 'AWS::StackName'
-{% for spoke in sceptre_user_data.TgwSpokes %}
-  VpcRouteTable{{spoke}}:
-    Type: AWS::EC2::Route
-    DependsOn: SharedResource
-    Properties:
-      DestinationCidrBlock: "{{ sceptre_user_data.TgwSpokes[spoke].CIDR }}"
-      RouteTableId: !Ref VpcRouteTableId
-      TransitGatewayId: !Ref TransitGateway
-{% endfor %}
 Outputs:
-  TransitGateway:
+  TransitGatewayId:
     Description: The transit gateway Id
     Value: !Ref TransitGateway
     Export:

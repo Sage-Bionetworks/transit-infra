@@ -5,10 +5,8 @@ stack_tags:
   Project: "Infrastructure"
   OwnerEmail: "it@sagebase.org"
 dependencies:
-  - "prod/essentials.yaml"
   - "prod/unionstationvpc.yaml"
 parameters:
-  VpcRouteTableId: !stack_output_external unionstationvpc::PrivateRouteTable
   VpcId: !stack_output_external unionstationvpc::VPCId
   SubnetIds:
     - !stack_output_external unionstationvpc::PrivateSubnet
@@ -18,7 +16,5 @@ sceptre_user_data:
   TgwSpokes:
     dustbunnyvpc:
       AccountId: "804034162148"
-      CIDR: "10.29.0.0/16"
     sandcastlevpc:
       AccountId: "563295687221"
-      CIDR: "10.23.0.0/16"
