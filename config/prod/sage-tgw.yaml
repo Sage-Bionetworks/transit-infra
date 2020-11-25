@@ -9,7 +9,6 @@ dependencies:
   - "prod/unionstationvpc.yaml"
 parameters:
   VpcRouteTableId: !stack_output_external unionstationvpc::PrivateRouteTable
-  ShareTgw: "true"
   VpcId: !stack_output_external unionstationvpc::VPCId
   SubnetIds:
     - !stack_output_external unionstationvpc::PrivateSubnet
@@ -17,9 +16,9 @@ parameters:
     - !stack_output_external unionstationvpc::PrivateSubnet2
 sceptre_user_data:
   TgwSpokes:
-    ItSandbox:
+    dustbunnyvpc:
       AccountId: "804034162148"
-      CIDR: "10.29.0.0/16"   # dustbunnyvpc
-    Sandbox:
+      CIDR: "10.29.0.0/16"
+    sandcastlevpc:
       AccountId: "563295687221"
-      CIDR: "10.23.0.0/16"   # sandcastlevpc
+      CIDR: "10.23.0.0/16"
