@@ -3,7 +3,13 @@ AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   TransitAdminMetadata:
     Type: String
-    Description: "Public certificate for Jumpcloud transit-admin app"
+    Description: "Public certificate for Jumpcloud transit-admin SSO"
+  TransitVpnMetadata:
+    Type: String
+    Description: "Public certificate for Jumpcloud transitvpn SSO"
+  TransitVpnSspMetadata:
+    Type: String
+    Description: "Public certificate for Jumpcloud transitvpnssp SSO"
 Resources:
   TransitAdminSamlProvider:
     Type: Custom::SAMLProvider
@@ -30,6 +36,22 @@ Resources:
             Condition:
               StringEquals:
                 "SAML:aud": "https://signin.aws.amazon.com/saml"
+  TransitVpnSamlProvider:
+    Type: Custom::SAMLProvider
+    Properties:
+      ServiceToken: !ImportValue
+        'Fn::Sub': '${AWS::Region}-cfn-cr-saml-provider-FunctionArn'
+      Name: "transitvpn"
+      Metadata: !Ref TransitVpnMetadata
+      URL: ""
+  TransitVpnSspSamlProvider:
+    Type: Custom::SAMLProvider
+    Properties:
+      ServiceToken: !ImportValue
+        'Fn::Sub': '${AWS::Region}-cfn-cr-saml-provider-FunctionArn'
+      Name: "transitvpnssp"
+      Metadata: !Ref TransitVpnSspMetadata
+      URL: ""
 Outputs:
   TransitAdminSamlProviderArn:
     Value: !Ref TransitAdminSamlProvider
@@ -39,3 +61,11 @@ Outputs:
     Value: !GetAtt TransitAdminSamlProviderRole.Arn
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitAdminSamlProviderRoleArn'
+  TransitVpnSamlProvider:
+    Value: !Ref TransitVpnSamlProvider
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitVpnSamlProviderArn'
+  TransitVpnSspSamlProvider:
+    Value: !Ref TransitVpnSspSamlProvider
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitVpnSspSamlProviderArn'
