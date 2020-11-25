@@ -1,0 +1,17 @@
+template_path: "transit-gateway-routes.j2"
+stack_name: "sage-tgw-routes"
+stack_tags:
+  Department: "Platform"
+  Project: "Infrastructure"
+  OwnerEmail: "it@sagebase.org"
+dependencies:
+  - "prod/sage-tgw.yaml"
+parameters:
+  TransitGatewayId: !stack_output_external sage-tgw::TransitGatewayId
+  VpcRouteTableId: !stack_output_external unionstationvpc::PrivateRouteTable
+sceptre_user_data:
+  TgwSpokes:
+    dustbunnyvpc:
+      CIDR: "10.29.0.0/16"
+    sandcastlevpc:
+      CIDR: "10.23.0.0/16"

@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Setup AWS transit gateway routes
+Parameters:
+  TransitGatewayId:
+    Description: 'The transit gateway ID'
+    Type: String
+  VpcRouteTableId:
+    Description: 'The VPC ID to attach'
+    Type: String
+Resources:
+{% for spoke in sceptre_user_data.TgwSpokes %}
+  VpcRouteTable{{spoke}}:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: "{{ sceptre_user_data.TgwSpokes[spoke].CIDR }}"
+      RouteTableId: !Ref VpcRouteTableId
+      TransitGatewayId: !Ref TransitGatewayId
+{% endfor %}
