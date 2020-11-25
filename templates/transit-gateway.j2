@@ -58,7 +58,7 @@ Resources:
         - Key: Name
           Value: !Ref 'AWS::StackName'
 {% for spoke in sceptre_user_data.TgwSpokes %}
-  RouteTable{{spoke}}:
+  VpcRouteTable{{spoke}}:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: "{{ sceptre_user_data.TgwSpokes[spoke].CIDR }}"
