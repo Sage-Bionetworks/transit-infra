@@ -61,11 +61,11 @@ Outputs:
     Value: !GetAtt TransitAdminSamlProviderRole.Arn
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitAdminSamlProviderRoleArn'
-  TransitVpnSamlProvider:
+  TransitVpnSamlProviderArn:
     Value: !Ref TransitVpnSamlProvider
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitVpnSamlProviderArn'
-  TransitVpnSspSamlProvider:
+  TransitVpnSspSamlProviderArn:
     Value: !Ref TransitVpnSspSamlProvider
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-TransitVpnSspSamlProviderArn'
