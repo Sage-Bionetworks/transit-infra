@@ -38,6 +38,12 @@ Resources:
           ToPort: -1
           IpProtocol: "-1"
 
+  VpnCloudwatchLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Ref ConnectionLogGroup
+      RetentionInDays: 180
+
   VpnEndpoint:
     Type: AWS::EC2::ClientVpnEndpoint
     Properties:
@@ -48,8 +54,8 @@ Resources:
             SelfServiceSAMLProviderArn: !Ref VpnSspSamlProviderArn
       ClientCidrBlock: !Ref ClientCidrBlock
       ConnectionLogOptions:
-        Enabled: true
-        CloudwatchLogGroup: !Ref ConnectionLogGroup
+        Enabled: false
+        CloudwatchLogGroup: !Ref VpnCloudwatchLogGroup
       SplitTunnel: true
       ServerCertificateArn: !Ref ServerCertificateArn
       SelfServicePortal: "enabled"
