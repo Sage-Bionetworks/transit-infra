@@ -54,7 +54,7 @@ Resources:
             SelfServiceSAMLProviderArn: !Ref VpnSspSamlProviderArn
       ClientCidrBlock: !Ref ClientCidrBlock
       ConnectionLogOptions:
-        Enabled: false
+        Enabled: true
         CloudwatchLogGroup: !Ref VpnCloudwatchLogGroup
       SplitTunnel: true
       ServerCertificateArn: !Ref ServerCertificateArn
@@ -78,8 +78,13 @@ Resources:
 {% endfor %}
 
 {% for cidr in sceptre_user_data.DestinationCIDRs %}
-  VpnEndpointAuthorization{{loop.index}}:
+  {% set cidrloop = loop %}
+  VpnEndpointAuthorization{{cidrloop.index}}:
     Type: AWS::EC2::ClientVpnAuthorizationRule
+    DependsOn:
+  {% for id in sceptre_user_data.SubnetIds %}
+      - VpnEndpointAssociation{{loop.index}}
+  {% endfor %}
     Properties:
       AuthorizeAllGroups: true
       ClientVpnEndpointId: !Ref VpnEndpoint
@@ -88,13 +93,18 @@ Resources:
 
 {% for cidr in sceptre_user_data.DestinationCIDRs %}
   {% set cidrloop = loop %}
-  {% for id in sceptre_user_data.SubnetIds %}
-  VpnEndpointRoute{{cidrloop.index}}{{loop.index}}:
+  {% for SubnetId in sceptre_user_data.SubnetIds %}
+    {% set SubnetIdLoop = loop %}
+  VpnEndpointRoute{{cidrloop.index}}{{SubnetIdLoop.index}}:
     Type: AWS::EC2::ClientVpnRoute
+    DependsOn:
+    {% for depend in sceptre_user_data.SubnetIds %}
+        - VpnEndpointAssociation{{loop.index}}
+    {% endfor %}
     Properties:
       ClientVpnEndpointId: !Ref VpnEndpoint
       DestinationCidrBlock: {{ cidr }}
-      TargetVpcSubnetId: {{ id }}
+      TargetVpcSubnetId: {{ SubnetId }}
   {% endfor %}
 {% endfor %}
 
