@@ -1,0 +1,32 @@
+template_path: "client-vpn.j2"
+stack_name: "sage-client-vpn"
+stack_tags:
+  Department: "Platform"
+  Project: "Infrastructure"
+  OwnerEmail: "it@sagebase.org"
+dependencies:
+  - "prod/jumpcloud-idp.yaml"
+  - "prod/unionstationvpc.yaml"
+parameters:
+  ClientCidrBlock: "10.100.0.0/16"
+  VpnSamlProviderArn: !stack_output_external jumpcloud-idp::TransitVpnSamlProviderArn
+  VpnSspSamlProviderArn: !stack_output_external jumpcloud-idp::TransitVpnSspSamlProviderArn
+  VpcId: !stack_output_external unionstationvpc::VPCId
+  ConnectionLogGroup: "/aws/client-vpn/sage-client-vpn"
+  # manually generated and imported server cert, saved to lastpass "Sage VPN Certificate"
+  # https://docs.aws.amazon.com/vpn/latest/clientvpn-admin/cvpn-getting-started.html#cvpn-getting-started-certs
+  ServerCertificateArn: "arn:aws:acm:us-east-1:153370007719:certificate/8bdbf421-c38a-4d87-8a03-821a1b7acab6"
+sceptre_user_data:
+  SubnetIds:
+    - !stack_output_external unionstationvpc::PrivateSubnet
+    - !stack_output_external unionstationvpc::PrivateSubnet1
+    - !stack_output_external unionstationvpc::PrivateSubnet2
+#  DestinationCIDRs:
+#    - "10.29.0.0/16"  # itsandbox (dustbunnyvpc)
+#    - "10.23.0.0/16"  # sandbox (sandcastlevpc)
+  TgwSpokes:
+    # "10.50.0.0/16" (unionstationvpc) route automatically setup by the VPN endpoint association
+    dustbunnyvpc:
+      CIDR: "10.29.0.0/16"
+    sandcastlevpc:
+      CIDR: "10.23.0.0/16"
