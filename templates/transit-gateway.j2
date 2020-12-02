@@ -37,9 +37,9 @@ Resources:
       AllowExternalPrincipals: true
       Name: !Sub '${AWS::StackName}'
       Principals:
-      {% for spoke in sceptre_user_data.TgwSpokes %}
-        - "{{ sceptre_user_data.TgwSpokes[spoke].AccountId }}"
-      {% endfor %}
+{%    for spoke, spoke_data in sceptre_user_data.TgwSpokes.items() %}
+        - "{{ spoke_data.AccountId }}"
+{%    endfor %}
       ResourceArns:
         - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:transit-gateway/${TransitGateway}'
       Tags:

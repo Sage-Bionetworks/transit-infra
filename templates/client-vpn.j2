@@ -77,37 +77,37 @@ Resources:
       SubnetId: {{ id }}
 {% endfor %}
 
-{% for spoke in sceptre_user_data.TgwSpokes %}
-  {% set spokeloop = loop %}
+{% for spoke, spoke_data in sceptre_user_data.TgwSpokes.items() %}
+{%   set spokeloop = loop %}
   {{ spoke }}VpnEndpointAuthorization{{ spokeloop.index }}:
     Type: AWS::EC2::ClientVpnAuthorizationRule
     DependsOn:
-    {% for id in sceptre_user_data.SubnetIds %}
+{%   for id in sceptre_user_data.SubnetIds %}
       - VpnEndpointAssociation{{ loop.index }}
-    {% endfor %}
+{%   endfor %}
     Properties:
       Description: {{ spoke }}
       AuthorizeAllGroups: true
       ClientVpnEndpointId: !Ref VpnEndpoint
-      TargetNetworkCidr: {{ sceptre_user_data.TgwSpokes[spoke].CIDR }}
+      TargetNetworkCidr: {{ spoke_data.CIDR }}
 {% endfor %}
 
-{% for spoke in sceptre_user_data.TgwSpokes %}
-  {% set spokeloop = loop %}
-  {% for SubnetId in sceptre_user_data.SubnetIds %}
-    {% set SubnetIdLoop = loop %}
+{% for spoke, spoke_data in sceptre_user_data.TgwSpokes.items() %}
+{%   set spokeloop = loop %}
+{%   for SubnetId in sceptre_user_data.SubnetIds %}
+{%     set SubnetIdLoop = loop %}
   {{ spoke }}VpnEndpointRoute{{ SubnetIdLoop.index }}:
     Type: AWS::EC2::ClientVpnRoute
     DependsOn:
-    {% for depend in sceptre_user_data.SubnetIds %}
+{%     for depend in sceptre_user_data.SubnetIds %}
       - VpnEndpointAssociation{{ loop.index }}
-    {% endfor %}
+{%     endfor %}
     Properties:
       Description: {{ spoke }}
       ClientVpnEndpointId: !Ref VpnEndpoint
-      DestinationCidrBlock: {{ sceptre_user_data.TgwSpokes[spoke].CIDR }}
+      DestinationCidrBlock: {{ spoke_data.CIDR }}
       TargetVpcSubnetId: {{ SubnetId }}
-  {% endfor %}
+{%   endfor %}
 {% endfor %}
 
 Outputs:
