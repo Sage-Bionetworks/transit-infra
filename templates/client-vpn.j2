@@ -69,34 +69,37 @@ Resources:
             - Key: "Name"
               Value: !Ref AWS::StackName
 
-{% for id in sceptre_user_data.SubnetIds %}
+{% for subnet_id in sceptre_user_data.SubnetIds %}
   VpnEndpointAssociation{{ loop.index }}:
     Type: AWS::EC2::ClientVpnTargetNetworkAssociation
     Properties:
       ClientVpnEndpointId: !Ref VpnEndpoint
-      SubnetId: {{ id }}
+      SubnetId: {{ subnet_id }}
 {% endfor %}
 
 {% for spoke, spoke_data in sceptre_user_data.TgwSpokes.items() %}
-{%   set spokeloop = loop %}
-  {{ spoke }}VpnEndpointAuthorization{{ spokeloop.index }}:
+{%   set spoke_loop = loop %}
+{%   for access_group in spoke_data.AccessGroups %}
+{%     set access_group_loop = loop %}
+  {{ spoke }}{{ access_group }}VpnEndpointAuthorization:
     Type: AWS::EC2::ClientVpnAuthorizationRule
     DependsOn:
-{%   for id in sceptre_user_data.SubnetIds %}
+{%     for subnet_id in sceptre_user_data.SubnetIds %}
       - VpnEndpointAssociation{{ loop.index }}
-{%   endfor %}
+{%     endfor %}
     Properties:
-      Description: {{ spoke }}
-      AuthorizeAllGroups: true
+      Description: {{ spoke }}-{{ access_group }}
+      AccessGroupId: {{ access_group }}
       ClientVpnEndpointId: !Ref VpnEndpoint
       TargetNetworkCidr: {{ spoke_data.CIDR }}
+{%   endfor %}
 {% endfor %}
 
 {% for spoke, spoke_data in sceptre_user_data.TgwSpokes.items() %}
-{%   set spokeloop = loop %}
-{%   for SubnetId in sceptre_user_data.SubnetIds %}
-{%     set SubnetIdLoop = loop %}
-  {{ spoke }}VpnEndpointRoute{{ SubnetIdLoop.index }}:
+{%   set spoke_loop = loop %}
+{%   for subnet_id in sceptre_user_data.SubnetIds %}
+{%     set subnet_id_loop = loop %}
+  {{ spoke }}VpnEndpointRoute{{ subnet_id_loop.index }}:
     Type: AWS::EC2::ClientVpnRoute
     DependsOn:
 {%     for depend in sceptre_user_data.SubnetIds %}
@@ -106,7 +109,7 @@ Resources:
       Description: {{ spoke }}
       ClientVpnEndpointId: !Ref VpnEndpoint
       DestinationCidrBlock: {{ spoke_data.CIDR }}
-      TargetVpcSubnetId: {{ SubnetId }}
+      TargetVpcSubnetId: {{ subnet_id }}
 {%   endfor %}
 {% endfor %}
 
