@@ -14,7 +14,25 @@ parameters:
     - !stack_output_external unionstationvpc::PrivateSubnet2
 sceptre_user_data:
   TgwSpokes:
+    # org-sagebase-itsandbox
     dustbunnyvpc:
       AccountId: "804034162148"
+    # org-sagebase-sandbox
     sandcastlevpc:
       AccountId: "563295687221"
+    # org-sagebase-scicomp
+    computevpc:
+      AccountId: "055273631518"
+    snowflakevpc:
+      AccountId: "055273631518"
+    iatlasvpc:
+      AccountId: "055273631518"
+    # org-sagebase-scipooldev
+    cesspoolvpc:
+      AccountId: "465877038949"
+    # org-sagebase-scipoolprod
+    internalpoolvpc:
+      AccountId: "237179673806"
+    # org-sagebase-strides
+    stridespoolvpc:
+      AccountId: "423819316185"
