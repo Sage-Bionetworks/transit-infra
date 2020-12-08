@@ -81,7 +81,7 @@ Resources:
 {%   set spoke_loop = loop %}
 {%   for access_group in spoke_data.AccessGroups %}
 {%     set access_group_loop = loop %}
-  {{ spoke }}{{ access_group }}VpnEndpointAuthorization:
+  VpnEndpointAuthorization{{ spoke_loop.index }}{{ access_group_loop.index }}:
     Type: AWS::EC2::ClientVpnAuthorizationRule
     DependsOn:
 {%     for subnet_id in sceptre_user_data.SubnetIds %}
@@ -99,14 +99,14 @@ Resources:
 {%   set spoke_loop = loop %}
 {%   for subnet_id in sceptre_user_data.SubnetIds %}
 {%     set subnet_id_loop = loop %}
-  {{ spoke }}VpnEndpointRoute{{ subnet_id_loop.index }}:
+  VpnEndpointRoute{{ spoke_loop.index }}{{ subnet_id_loop.index }}:
     Type: AWS::EC2::ClientVpnRoute
     DependsOn:
 {%     for depend in sceptre_user_data.SubnetIds %}
       - VpnEndpointAssociation{{ loop.index }}
 {%     endfor %}
     Properties:
-      Description: {{ spoke }}
+      Description: {{ spoke }}-{{ subnet_id }}
       ClientVpnEndpointId: !Ref VpnEndpoint
       DestinationCidrBlock: {{ spoke_data.CIDR }}
       TargetVpcSubnetId: {{ subnet_id }}
