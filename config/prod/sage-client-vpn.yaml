@@ -32,3 +32,36 @@ sceptre_user_data:
       AccessGroups:
         - "admin"
         - "scientists"
+    # org-sagebase-scicomp
+    computevpc:
+      CIDR: "10.29.0.0/16"
+      AccessGroups:
+        - "admin"
+        - "aws-scicomp-developers"
+    snowflakevpc:
+      CIDR: "10.29.0.0/16"
+      AccessGroups:
+        - "admin"
+        - "aws-scicomp-developers"
+    iatlasvpc:
+      CIDR: "10.29.0.0/16"
+      AccessGroups:
+        - "admin"
+    # org-sagebase-scipooldev
+    cesspoolvpc:
+      CIDR: "10.29.0.0/16"
+      AccessGroups:
+        - "admin"
+        - "aws-scicomp-developers"
+    # org-sagebase-scipoolprod
+    internalpoolvpc:
+      CIDR: "10.29.0.0/16"
+      AccessGroups:
+        - "admin"
+        - "aws-scicomp-developers"
+    # org-sagebase-strides
+    stridespoolvpc:
+      CIDR: "10.29.0.0/16"
+      AccessGroups:
+        - "admin"
+        - "aws-scicomp-developers"
