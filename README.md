@@ -74,9 +74,12 @@ We setup AWS client VPN leveraging routes that were setup by the transit gateway
 configuration.  The AWS client VPN is created with
 [sage-client-vpn.yaml](config/prod/sage-client-vpn.yaml) file.
 
-We federate Jumpcloud users to the VPN with [jumpcloud-idp.yaml](config/prod/jumpcloud-idp.yaml).
-This allows Jumpcloud users to login to the VPN and it will also allow us to manage
-user/group access to the VPCs.
+We federate Jumpcloud users to the VPN with
+[Jumpcloud SSO](https://support.jumpcloud.com/support/s/article/Single-Sign-On-SSO-with-AWS-Client-VPN)
+and [jumpcloud-idp.yaml](config/prod/jumpcloud-idp.yaml).  This allows users to login
+to the VPN with their Jumpcloud credentials.  Once they are logged in they
+will have access to AWS VPCs.
+
 
 ### Manage VPN Access
 VPN user access is managed by [sceptre_user_data.TgwSpokes](config/prod/sage-client-vpn.yaml).
