@@ -68,6 +68,25 @@ Workflow to test access:
 to the instance.
 3. SSH into unionstation EC2 and attempt to access (ping/ssh/etc..) the EC2 in the spoke account.
 
+
+## Setup AWS client VPN
+We setup AWS client VPN leveraging routes that were setup by the transit gateway
+configuration.  The AWS client VPN is created with
+[sage-client-vpn.yaml](config/prod/sage-client-vpn.yaml) file.
+
+We federate Jumpcloud users to the VPN with [jumpcloud-idp.yaml](config/prod/jumpcloud-idp.yaml).
+This allows Jumpcloud users to login to the VPN and it will also allow us to manage
+user/group access to the VPCs.
+
+### Manage VPN Access
+VPN user access is managed by [sceptre_user_data.TgwSpokes](config/prod/sage-client-vpn.yaml).
+Modify the `TgwSpokes` definition to update Jumpcloud user access to VPCs.
+
+__Note:__ `AccessGroups` must match Jumpcloud groups
+
+Once the configurations are setup users will get access to specific VPCs after logging into
+the VPN.
+
 ## Instructions to create or update CF stacks
 
 ```
