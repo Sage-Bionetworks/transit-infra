@@ -10,7 +10,7 @@ Parameters:
     Type: String
 Resources:
 {% for spoke, spoke_data in sceptre_user_data.TgwSpokes.items() %}
-  VpcRouteTable{{spoke}}:
+  VpcRouteTable{{ loop.index }}:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: "{{ spoke_data.CIDR }}"
