@@ -36,3 +36,6 @@ sceptre_user_data:
     # org-sagebase-strides
     stridespoolvpc:
       AccountId: "423819316185"
+    # org-sagebase-bridgeprod
+    BridgeServer2-vpc:
+      AccountId: "649232250620"
