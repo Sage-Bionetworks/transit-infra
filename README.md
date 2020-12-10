@@ -74,11 +74,38 @@ We setup AWS client VPN leveraging routes that were setup by the transit gateway
 configuration.  The AWS client VPN is created with
 [sage-client-vpn.yaml](config/prod/sage-client-vpn.yaml) file.
 
+### Setup IDP
 We federate Jumpcloud users to the VPN with
 [Jumpcloud SSO](https://support.jumpcloud.com/support/s/article/Single-Sign-On-SSO-with-AWS-Client-VPN)
 and [jumpcloud-idp.yaml](config/prod/jumpcloud-idp.yaml).  This allows users to login
 to the VPN with their Jumpcloud credentials.  Once they are logged in they
-will have access to AWS VPCs.
+will have access to resources in AWS VPCs.
+
+### Setup Jumpcloud SSO
+We need to setup two SSO apps in jumpcloud because it does not support multiple ACS URLs.
+We need one SSO for the VPN connection and another one for the VPN self service portal.
+
+Follow [instructions](https://docs.aws.amazon.com/vpn/latest/clientvpn-admin/client-authentication.html)
+to create a certificate using [easy-rsa](https://github.com/OpenVPN/easy-rsa)
+
+Create a `transitvpn` SSO app for VPN access:
+  * SP Entity ID: urn:amazon:webservices:clientvpn
+  * ACS URL: http://127.0.0.1:35001
+  * IDP URL: https://sso.jumpcloud.com/saml2/transitvpn
+  * Attributes: FirstName=firstname, LastName=lastname, NameID=email
+  * Group Attributes: memberOf
+
+Create a `transitvpnssp` SSO app for the VPN self service portal access:
+  * SP Entity ID: urn:amazon:webservices:clientvpn
+  * ACS URL: http://127.0.0.1:35001
+  * IDP URL: https://self-service.clientvpn.amazonaws.com/api/auth/sso/saml
+  * Attributes: FirstName=firstname, LastName=lastname, NameID=email
+  * Group Attributes: memberOf
+
+Deploy [sage-client-vpn.yaml](config/prod/sage-client-vpn.yaml) to create the
+AWS client VPN endpoint.  __Note:__ the `ServerCertificateArn` parameter value should
+be the certificate that was created by easy-rsa and imported into the
+AWS cerfiticate manager.
 
 
 ### Manage VPN Access
