@@ -18,71 +18,77 @@ and spoke architecture.
 6. Create attachments to the transit gateway hub from spoke accounts.
 7. Add ("Associate") spoke TGW attachments to the hub transit gateway route table.
 
-### Setup a Hub
-Setup a transit gateway("hub") and send invitations to share the
-transit gateway to spoke accounts defined in the `TgwSharedPrincipals`
-parameter.
+## Setup Transit Gateway
 
-#### Create a transit gateway
-First step is to create the transit gateway, create a TGW route table, share the TGW
-with within the transit account, then use the AWS resource access manager to share
-the TGW to the spoke accounts.
+### Setup Hub VPC
+The transit gateway hub VPC is created with [unionstation](config/prod/unionstationvpc.yaml)
+file.  That TGW is shared out to our spoke accounts defined in by
+[sceptre_user_data.TgwSpokes](config/prod/sage-tgw.yaml).
 
-1. Create a sceptre config template similar to config/prod/sage-tgw.yaml
-2. Deploy the hub template:
-`
-sceptre --var "profile=transit" --var "region=us-east-1" launch --yes prod/new-tgw.yaml
-`
+### Add spoke VPC
+The Hub VPC is already setup and only need to be done once.  Spokes may be connected to the
+hub with the following workflow:
 
-__Note__: That template takes care of creating the TGW, creating the route table,
-and sending an invition to share the TGW to spoke accounts.  However it does not
-setup sharing within the same account.
+1. Create a PR in this repo with new `TgwSpokes` in [sage-tgw.yaml](config/prod/sage-tgw.yaml)
+and [sagetgw-routes.yaml](config/prod/sage-tgw-routes.yaml).  Look at existing PRs as
+[examples](https://github.com/Sage-Bionetworks/transit-infra/pull/23).
+2. Review and merge PR
+3. Once merged and deployed the TGW will be shared to the spoke account and VPC routes
+will be setup to route traffic from the hub to the spoke VPC.
+4. Login to spoke account with admin user/role and accept the sharing invitation
+in Resource Access Manager -> Shared with me -> Resource Shares ->
+accept the invitation
+5. Once the invitation is accepted the shared transit gateway (from "hub")
+should appear in the spoke account's VPC -> TransitGateway
 
-#### Share the transit gateway
-__Note__: The TGW must be shared within the transit account. Neither cloudformation nor
-the aws cli support configuring the TGW `sharing` setting.
+#### Setup Spoke Attachment
+Setting up a spoke requires setting up routes on the Hub VPC and on the spoke VPC.
+This section is to setup the routes on the spoke end.
 
-Login to the AWS transit account then navigate to VPC -> Transit Gateways ->
-Select the newly provisioned transit gateway -> Sharing tab ->
-Share transit gateway -> Share.
+__NOTE__: Make sure hub VPC invitation has been accepted in `Add spoke VPC` before continuing
 
-### Setup a Spoke
-Setting up the spoke account is a two step process.  First is to accept the
-sharing invitation from the hub then create an attachment to the hub.
+1. Create a PR in the spoke repo similar to
+[tgw-spoke-BridgeServer2-vpc.yaml](https://github.com/Sage-Bionetworks/Bridge-infra/tree/prod/config/prod/tgw-spoke-BridgeServer2-vpc.yaml)
+to setup the attachment and routes from spoke to hub VPC.
+Look at existing PR as an [example](https://github.com/Sage-Bionetworks/Bridge-infra/pull/142)
+2. Review and merge PR
+3. Once merged and deployed the TGW there will be a VPC route from spoke
+to hub VPC.  There will also be a new security group that will allow the
+hub (unionstation) access to the resources in the spoke account.
 
-#### Accept Invitation
-The spoke accounts must accept the invitation sent by the hub.
-The transit gateway attachments are then setup on the spoke accounts.
+### Allow Traffic Between VPCs
+The key to allowing traffic between the hub (unionstation) VPC and the spoke VPC
+is to apply the `TgwSecurityGroup` to the resource in the spoke account.
 
-1. Login to spoke accounts defined in TgwSharedPrincipals
-2. Navigate to Resource Access Manager -> Shared with me -> Resource Shares ->
-accept the invitation.
-3. Once the invitation is accepted the shared transit gateway (from "hub")
-should appear in VPC -> TransitGateway.
+__Note:__ The `TgwSecurityGroup` SG name will be something like `tgw-spoke-BridgeVpc-TgwSecurityGroup-HC8K48Q48USV`
 
-#### Setup Attachement
-Setting up an attachment adds spoke accounts to the hub account however it does
-not setup routes between VPCs.
+Workflow to test access:
+1. Provision EC2 in unionstation with SSH access
+2. Provision a private EC2 in spoke account (i.e org-sagebase-bridgedev) and apply the `TgwSecurityGroup`
+to the instance.
+3. SSH into unionstation EC2 and attempt to access (ping/ssh/etc..) the EC2 in the spoke account.
 
-1. Create an attachment to the hub from the spoke accounts by creating
-a sceptre template similar to
-`sandbox-infra/sage-tgw-sandcastlevpc-attachment.yaml`
-2. Deploy the spoke template:
-`
-sceptre --var "profile=transit" --var "region=us-east-1" launch --yes prod/sage-tgw-sandcastlevpc-attachment.yaml
-`
 
-### Add spoke TGW attachments
-__Note__: This step depends on having already completed `Setup a Hub` and `Setup a Spoke`.
+## Setup AWS client VPN
+We setup AWS client VPN leveraging routes that were setup by the transit gateway
+configuration.  The AWS client VPN is created with
+[sage-client-vpn.yaml](config/prod/sage-client-vpn.yaml) file.
 
-1. Create a sceptre config template similar to config/prod/sage-tgw-associations.yaml
-2. Deploy the template:
-`
-sceptre --var "profile=transit" --var "region=us-east-1" launch --yes prod/sage-tgw-association.yaml
-`
+We federate Jumpcloud users to the VPN with
+[Jumpcloud SSO](https://support.jumpcloud.com/support/s/article/Single-Sign-On-SSO-with-AWS-Client-VPN)
+and [jumpcloud-idp.yaml](config/prod/jumpcloud-idp.yaml).  This allows users to login
+to the VPN with their Jumpcloud credentials.  Once they are logged in they
+will have access to AWS VPCs.
 
-That template will associate VPCs to your new route table.
 
+### Manage VPN Access
+VPN user access is managed by [sceptre_user_data.TgwSpokes](config/prod/sage-client-vpn.yaml).
+Modify the `TgwSpokes` definition to update Jumpcloud user access to VPCs.
+
+__Note:__ `AccessGroups` must match Jumpcloud groups
+
+Once the configurations are setup users will get access to specific VPCs after logging into
+the VPN.
 
 ## Instructions to create or update CF stacks
 
