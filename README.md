@@ -87,6 +87,7 @@ We need one SSO for the VPN connection and another one for the VPN self service 
 
 Follow [instructions](https://docs.aws.amazon.com/vpn/latest/clientvpn-admin/client-authentication.html)
 to create a certificate using [easy-rsa](https://github.com/OpenVPN/easy-rsa)
+then import the certifcate to the AWS certificate manager
 
 Create a `transitvpn` SSO app for VPN access:
   * SP Entity ID: urn:amazon:webservices:clientvpn
