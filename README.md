@@ -95,15 +95,15 @@ Create a `transitvpn` SSO app for VPN access:
   * Enable `Declare Redirect Endpoint` option
   * IDP URL: `https://sso.jumpcloud.com/saml2/transitvpn`
   * Attributes: `FirstName=firstname`, `LastName=lastname`, `NameID=email`
-  * Enable Group Attributes option and set it to `memberOf`
+  * Enable `Group Attributes option` and set it to `memberOf`
 
 Create a `transitvpnssp` SSO app for the VPN self service portal access:
   * SP Entity ID: `urn:amazon:webservices:clientvpn`
   * ACS URL: `http://127.0.0.1:35001`
   * Enable `Declare Redirect Endpoint` option
   * IDP URL: `https://self-service.clientvpn.amazonaws.com/api/auth/sso/saml`
-  * Attributes: `FirstName=firstname, `LastName=lastname`, `NameID=email`
-  * Enable Group Attributes option and set it to `memberOf`
+  * Attributes: `FirstName=firstname`, `LastName=lastname`, `NameID=email`
+  * Enable `Group Attributes option` and set it to `memberOf`
 
 Deploy [sage-client-vpn.yaml](config/prod/sage-client-vpn.yaml) to create the
 AWS client VPN endpoint.  __Note:__ the `ServerCertificateArn` parameter value should
