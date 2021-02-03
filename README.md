@@ -1,3 +1,5 @@
+# This repo has been moved to https://github.com/Sage-Bionetworks-IT/organizations-infra/tree/master/sceptre/transit
+
 # Overview
 A project to install, configure and manage org-sagebase-transit account.
 The purpose of this account is to run the AWS transit gateway as the
